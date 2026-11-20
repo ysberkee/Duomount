@@ -1,15 +1,15 @@
 static const char *const g_ro_ro[SM_L10N_COUNT] = {
     /* English: Go to Debug Settings */
     [SM_L10N_ACTION_DEBUG_SETTINGS] = "Mergi la setările de depanare",
-    /* English: ShadowMount+ v%s\n© Drakmor and Community */
-    [SM_L10N_STARTUP] = "ShadowMount+ v%s\n© Drakmor și comunitatea",
-    /* English: ShadowMount+ v%s\n© Drakmor and Community\nControl: http://%s:%u */
+    /* English: DuoMount v%s\n© Drakmor and Community */
+    [SM_L10N_STARTUP] = "DuoMount v%s\n© Drakmor și comunitatea",
+    /* English: DuoMount v%s\n© Drakmor and Community\nControl: http://%s:%u */
     [SM_L10N_STARTUP_WEB] =
-        "ShadowMount+ v%s\n© Drakmor și comunitatea\nControl: http://%s:%u",
-    /* English: ShadowMount+: recursive_scan=1 is deprecated, using scan_depth=2. */
-    [SM_L10N_RECURSIVE_SCAN_DEPRECATED] = "ShadowMount+: recursive_scan=1 este depășit, se folosește scan_depth=2.",
-    /* English: ShadowMount+: scan depth %u enabled. */
-    [SM_L10N_SCAN_DEPTH_ENABLED] = "ShadowMount+: adâncimea de scanare %u este activată.",
+        "DuoMount v%s\n© Drakmor și comunitatea\nControl: http://%s:%u",
+    /* English: DuoMount: recursive_scan=1 is deprecated, using scan_depth=2. */
+    [SM_L10N_RECURSIVE_SCAN_DEPRECATED] = "DuoMount: recursive_scan=1 este depășit, se folosește scan_depth=2.",
+    /* English: DuoMount: scan depth %u enabled. */
+    [SM_L10N_SCAN_DEPTH_ENABLED] = "DuoMount: adâncimea de scanare %u este activată.",
     /* English: Backport overlay failed: %s\n%s\n0x%08X */
     [SM_L10N_BACKPORT_OVERLAY_FAILED] = "Overlay backport eșuat: %s\n%s\n0x%08X",
     /* English: Emulators applied to game: %s */
@@ -54,18 +54,18 @@ static const char *const g_ro_ro[SM_L10N_COUNT] = {
     [SM_L10N_MISSING_PARAM] = "param.json/param.sfo lipsește sau este invalid:\n%s",
     /* English: Found %d new games. Processing... */
     [SM_L10N_FOUND_NEW_GAMES] = "S-au găsit %d jocuri noi. Se procesează...",
-    /* English: Library synchronized.\nFound %d games. */
-    [SM_L10N_LIBRARY_SYNCED] = "Bibliotecă sincronizată.\nS-au găsit %d jocuri.",
-    /* English: ShadowMount+: config reloaded. */
-    [SM_L10N_CONFIG_RELOADED] = "ShadowMount+: configurația a fost reîncărcată.",
+    /* English: DuoMount ready.\n%d games detected. */
+    [SM_L10N_LIBRARY_SYNCED] = "DuoMount\nBibliotecă sincronizată.\nS-au găsit %d jocuri.",
+    /* English: DuoMount: config reloaded. */
+    [SM_L10N_CONFIG_RELOADED] = "DuoMount: configurația a fost reîncărcată.",
     /* English: Duplicate %s ignored:\n%s\nexisting: %s */
     [SM_L10N_DUPLICATE_IGNORED] = "Duplicatul %s ignorat:\n%s\nexistent: %s",
     /* English: AMPR emulator updated */
     [SM_L10N_AMPR_EMULATOR_UPDATED] = "Emulatorul AMPR a fost actualizat",
-    /* English: ShadowMount+: failed to install ShellCore hooks */
-    [SM_L10N_SHELLCORE_HOOKS_FAILED] = "ShadowMount+: instalarea hook-urilor ShellCore a eșuat",
-    /* English: ShadowMount+: kstuff not found; waiting for it to start. */
-    [SM_L10N_KSTUFF_WAITING] = "ShadowMount+: kstuff nu a fost găsit; se așteaptă pornirea lui",
+    /* English: DuoMount: failed to install ShellCore hooks */
+    [SM_L10N_SHELLCORE_HOOKS_FAILED] = "DuoMount: instalarea hook-urilor ShellCore a eșuat",
+    /* English: DuoMount: kstuff not found; waiting for it to start. */
+    [SM_L10N_KSTUFF_WAITING] = "DuoMount: kstuff nu a fost găsit; se așteaptă pornirea lui",
     /* English: Target temperature %u °C → %u °C */
     [SM_L10N_TEMPERATURE_TRANSITION] = "Temperatura țintă %u °C → %u °C",
     /* English: External drive %s connected\nFree %llu.%llu GB of %llu.%llu (Block size %llu KB)\nGames on drive: %d%s */

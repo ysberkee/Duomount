@@ -1,15 +1,15 @@
 static const char *const g_de_de[SM_L10N_COUNT] = {
     /* English: Go to Debug Settings */
     [SM_L10N_ACTION_DEBUG_SETTINGS] = "Zu den Debug-Einstellungen",
-    /* English: ShadowMount+ v%s\n© Drakmor and Community */
-    [SM_L10N_STARTUP] = "ShadowMount+ v%s\n© Drakmor und die Community",
-    /* English: ShadowMount+ v%s\n© Drakmor and Community\nControl: http://%s:%u */
+    /* English: DuoMount v%s\n© Drakmor and Community */
+    [SM_L10N_STARTUP] = "DuoMount v%s\n© Drakmor und die Community",
+    /* English: DuoMount v%s\n© Drakmor and Community\nControl: http://%s:%u */
     [SM_L10N_STARTUP_WEB] =
-        "ShadowMount+ v%s\n© Drakmor und die Community\nSteuerung: http://%s:%u",
-    /* English: ShadowMount+: recursive_scan=1 is deprecated, using scan_depth=2. */
-    [SM_L10N_RECURSIVE_SCAN_DEPRECATED] = "ShadowMount+: recursive_scan=1 ist veraltet, scan_depth=2 wird verwendet.",
-    /* English: ShadowMount+: scan depth %u enabled. */
-    [SM_L10N_SCAN_DEPTH_ENABLED] = "ShadowMount+: Scan-Tiefe %u ist aktiviert.",
+        "DuoMount v%s\n© Drakmor und die Community\nSteuerung: http://%s:%u",
+    /* English: DuoMount: recursive_scan=1 is deprecated, using scan_depth=2. */
+    [SM_L10N_RECURSIVE_SCAN_DEPRECATED] = "DuoMount: recursive_scan=1 ist veraltet, scan_depth=2 wird verwendet.",
+    /* English: DuoMount: scan depth %u enabled. */
+    [SM_L10N_SCAN_DEPTH_ENABLED] = "DuoMount: Scan-Tiefe %u ist aktiviert.",
     /* English: Backport overlay failed: %s\n%s\n0x%08X */
     [SM_L10N_BACKPORT_OVERLAY_FAILED] = "Backport-Overlay fehlgeschlagen: %s\n%s\n0x%08X",
     /* English: Emulators applied to game: %s */
@@ -54,18 +54,18 @@ static const char *const g_de_de[SM_L10N_COUNT] = {
     [SM_L10N_MISSING_PARAM] = "param.json/param.sfo fehlt oder ist ungültig:\n%s",
     /* English: Found %d new games. Processing... */
     [SM_L10N_FOUND_NEW_GAMES] = "%d neue Spiele gefunden. Verarbeitung läuft...",
-    /* English: Library synchronized.\nFound %d games. */
-    [SM_L10N_LIBRARY_SYNCED] = "Bibliothek synchronisiert.\n%d Spiele gefunden.",
-    /* English: ShadowMount+: config reloaded. */
-    [SM_L10N_CONFIG_RELOADED] = "ShadowMount+: Konfiguration neu geladen.",
+    /* English: DuoMount ready.\n%d games detected. */
+    [SM_L10N_LIBRARY_SYNCED] = "DuoMount bereit.\n%d Spiele erkannt.",
+    /* English: DuoMount: config reloaded. */
+    [SM_L10N_CONFIG_RELOADED] = "DuoMount: Konfiguration neu geladen.",
     /* English: Duplicate %s ignored:\n%s\nexisting: %s */
     [SM_L10N_DUPLICATE_IGNORED] = "Duplikat %s ignoriert:\n%s\nvorhanden: %s",
     /* English: AMPR emulator updated */
     [SM_L10N_AMPR_EMULATOR_UPDATED] = "AMPR-Emulator aktualisiert",
-    /* English: ShadowMount+: failed to install ShellCore hooks */
-    [SM_L10N_SHELLCORE_HOOKS_FAILED] = "ShadowMount+: ShellCore-Hooks konnten nicht installiert werden",
-    /* English: ShadowMount+: kstuff not found; waiting for it to start. */
-    [SM_L10N_KSTUFF_WAITING] = "ShadowMount+: kstuff nicht gefunden; warte auf den Start",
+    /* English: DuoMount: failed to install ShellCore hooks */
+    [SM_L10N_SHELLCORE_HOOKS_FAILED] = "DuoMount: ShellCore-Hooks konnten nicht installiert werden",
+    /* English: DuoMount: kstuff not found; waiting for it to start. */
+    [SM_L10N_KSTUFF_WAITING] = "DuoMount: kstuff nicht gefunden; warte auf den Start",
     /* English: Target temperature %u °C → %u °C */
     [SM_L10N_TEMPERATURE_TRANSITION] = "Zieltemperatur %u °C → %u °C",
     /* English: External drive %s connected\nFree %llu.%llu GB of %llu.%llu (Block size %llu KB)\nGames on drive: %d%s */

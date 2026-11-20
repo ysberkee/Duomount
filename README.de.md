@@ -1,14 +1,23 @@
 <p align="center"><img src="assets/duomount-logo.png" width="320" alt="DuoMount Logo"></p>
 
-# DuoMount – experimentelle Beta 1
+# DuoMount – v0.1.1-beta.1
 
 **Ein PS5-Payload für Ordner, unterstützte Images und direkte PS5-Debug-FPKGs.**
 DuoMount verbindet die ShadowMountPlus-Basis von **drakmor** mit der eingebetteten
 FPKG-Laufzeit aus Kraken Mount von **quer3q**. Das Projekt hieß im ersten lokalen
 Test OneMount. Es ist ein eigener kombinierter Fork, keine offizielle Version
-der Originalprojekte. Betreuer: [ysberke](https://github.com/ysberke).
+der Originalprojekte. Betreuer: [DuoMount](https://github.com/ysberkee).
 
-[English README](README.md) · [Downloads](https://github.com/ysberke/DuoMount/releases)
+[English README](README.md) · [Downloads](https://github.com/ysberkee/Duomount/releases)
+
+## Benachrichtigungen
+
+Nach dem Bibliotheksscan beim Start meldet DuoMount mit eigenem Icon und
+Versionsnamen: **„DuoMount bereit. – N Spiele erkannt.“** Die Zahl stammt aus
+den unterstützten Quellen in deinen eingestellten Scanpfaden. Die vorhandene
+Einstellung für die Bibliotheksbenachrichtigung steuert diese Meldung; sie kann
+auch bei aktiviertem Quiet Mode erscheinen. Dafür muss kein zusätzlicher
+ShadowMountPlus-Payload gestartet werden.
 
 ## Was bedeutet Mounten?
 

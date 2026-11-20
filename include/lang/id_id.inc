@@ -1,15 +1,15 @@
 static const char *const g_id_id[SM_L10N_COUNT] = {
     /* English: Go to Debug Settings */
     [SM_L10N_ACTION_DEBUG_SETTINGS] = "Buka pengaturan debug",
-    /* English: ShadowMount+ v%s\n© Drakmor and Community */
-    [SM_L10N_STARTUP] = "ShadowMount+ v%s\n© Drakmor dan Komunitas",
-    /* English: ShadowMount+ v%s\n© Drakmor and Community\nControl: http://%s:%u */
+    /* English: DuoMount v%s\n© Drakmor and Community */
+    [SM_L10N_STARTUP] = "DuoMount v%s\n© Drakmor dan Komunitas",
+    /* English: DuoMount v%s\n© Drakmor and Community\nControl: http://%s:%u */
     [SM_L10N_STARTUP_WEB] =
-        "ShadowMount+ v%s\n© Drakmor dan Komunitas\nKontrol: http://%s:%u",
-    /* English: ShadowMount+: recursive_scan=1 is deprecated, using scan_depth=2. */
-    [SM_L10N_RECURSIVE_SCAN_DEPRECATED] = "ShadowMount+: recursive_scan=1 sudah usang, memakai scan_depth=2.",
-    /* English: ShadowMount+: scan depth %u enabled. */
-    [SM_L10N_SCAN_DEPTH_ENABLED] = "ShadowMount+: kedalaman pemindaian %u aktif.",
+        "DuoMount v%s\n© Drakmor dan Komunitas\nKontrol: http://%s:%u",
+    /* English: DuoMount: recursive_scan=1 is deprecated, using scan_depth=2. */
+    [SM_L10N_RECURSIVE_SCAN_DEPRECATED] = "DuoMount: recursive_scan=1 sudah usang, memakai scan_depth=2.",
+    /* English: DuoMount: scan depth %u enabled. */
+    [SM_L10N_SCAN_DEPTH_ENABLED] = "DuoMount: kedalaman pemindaian %u aktif.",
     /* English: Backport overlay failed: %s\n%s\n0x%08X */
     [SM_L10N_BACKPORT_OVERLAY_FAILED] = "Backport overlay gagal: %s\n%s\n0x%08X",
     /* English: Emulators applied to game: %s */
@@ -54,18 +54,18 @@ static const char *const g_id_id[SM_L10N_COUNT] = {
     [SM_L10N_MISSING_PARAM] = "param.json/param.sfo hilang atau tidak valid:\n%s",
     /* English: Found %d new games. Processing... */
     [SM_L10N_FOUND_NEW_GAMES] = "Menemukan %d game baru. Memproses...",
-    /* English: Library synchronized.\nFound %d games. */
-    [SM_L10N_LIBRARY_SYNCED] = "Pustaka disinkronkan.\nMenemukan %d game.",
-    /* English: ShadowMount+: config reloaded. */
-    [SM_L10N_CONFIG_RELOADED] = "ShadowMount+: konfigurasi dimuat ulang.",
+    /* English: DuoMount ready.\n%d games detected. */
+    [SM_L10N_LIBRARY_SYNCED] = "DuoMount\nPustaka disinkronkan.\nMenemukan %d game.",
+    /* English: DuoMount: config reloaded. */
+    [SM_L10N_CONFIG_RELOADED] = "DuoMount: konfigurasi dimuat ulang.",
     /* English: Duplicate %s ignored:\n%s\nexisting: %s */
     [SM_L10N_DUPLICATE_IGNORED] = "Duplikat %s diabaikan:\n%s\nyang ada: %s",
     /* English: AMPR emulator updated */
     [SM_L10N_AMPR_EMULATOR_UPDATED] = "Emulator AMPR diperbarui",
-    /* English: ShadowMount+: failed to install ShellCore hooks */
-    [SM_L10N_SHELLCORE_HOOKS_FAILED] = "ShadowMount+: gagal memasang hook ShellCore",
-    /* English: ShadowMount+: kstuff not found; waiting for it to start. */
-    [SM_L10N_KSTUFF_WAITING] = "ShadowMount+: kstuff tidak ditemukan; menunggu hingga dimulai",
+    /* English: DuoMount: failed to install ShellCore hooks */
+    [SM_L10N_SHELLCORE_HOOKS_FAILED] = "DuoMount: gagal memasang hook ShellCore",
+    /* English: DuoMount: kstuff not found; waiting for it to start. */
+    [SM_L10N_KSTUFF_WAITING] = "DuoMount: kstuff tidak ditemukan; menunggu hingga dimulai",
     /* English: Target temperature %u °C → %u °C */
     [SM_L10N_TEMPERATURE_TRANSITION] = "Suhu target %u °C → %u °C",
     /* English: External drive %s connected\nFree %llu.%llu GB of %llu.%llu (Block size %llu KB)\nGames on drive: %d%s */

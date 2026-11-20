@@ -1,15 +1,15 @@
 static const char *const g_hu_hu[SM_L10N_COUNT] = {
     /* English: Go to Debug Settings */
     [SM_L10N_ACTION_DEBUG_SETTINGS] = "Ugrás a hibakeresési beállításokhoz",
-    /* English: ShadowMount+ v%s\n© Drakmor and Community */
-    [SM_L10N_STARTUP] = "ShadowMount+ v%s\n© Drakmor és a közösség",
-    /* English: ShadowMount+ v%s\n© Drakmor and Community\nControl: http://%s:%u */
+    /* English: DuoMount v%s\n© Drakmor and Community */
+    [SM_L10N_STARTUP] = "DuoMount v%s\n© Drakmor és a közösség",
+    /* English: DuoMount v%s\n© Drakmor and Community\nControl: http://%s:%u */
     [SM_L10N_STARTUP_WEB] =
-        "ShadowMount+ v%s\n© Drakmor és a közösség\nVezérlés: http://%s:%u",
-    /* English: ShadowMount+: recursive_scan=1 is deprecated, using scan_depth=2. */
-    [SM_L10N_RECURSIVE_SCAN_DEPRECATED] = "ShadowMount+: a recursive_scan=1 elavult, scan_depth=2 lesz használva.",
-    /* English: ShadowMount+: scan depth %u enabled. */
-    [SM_L10N_SCAN_DEPTH_ENABLED] = "ShadowMount+: %u keresési mélység engedélyezve.",
+        "DuoMount v%s\n© Drakmor és a közösség\nVezérlés: http://%s:%u",
+    /* English: DuoMount: recursive_scan=1 is deprecated, using scan_depth=2. */
+    [SM_L10N_RECURSIVE_SCAN_DEPRECATED] = "DuoMount: a recursive_scan=1 elavult, scan_depth=2 lesz használva.",
+    /* English: DuoMount: scan depth %u enabled. */
+    [SM_L10N_SCAN_DEPTH_ENABLED] = "DuoMount: %u keresési mélység engedélyezve.",
     /* English: Backport overlay failed: %s\n%s\n0x%08X */
     [SM_L10N_BACKPORT_OVERLAY_FAILED] = "Backport overlay sikertelen: %s\n%s\n0x%08X",
     /* English: Emulators applied to game: %s */
@@ -54,18 +54,18 @@ static const char *const g_hu_hu[SM_L10N_COUNT] = {
     [SM_L10N_MISSING_PARAM] = "Hiányzó vagy érvénytelen param.json/param.sfo:\n%s",
     /* English: Found %d new games. Processing... */
     [SM_L10N_FOUND_NEW_GAMES] = "%d új játék található. Feldolgozás...",
-    /* English: Library synchronized.\nFound %d games. */
-    [SM_L10N_LIBRARY_SYNCED] = "Könyvtár szinkronizálva.\n%d játék található.",
-    /* English: ShadowMount+: config reloaded. */
-    [SM_L10N_CONFIG_RELOADED] = "ShadowMount+: a beállítások újratöltve.",
+    /* English: DuoMount ready.\n%d games detected. */
+    [SM_L10N_LIBRARY_SYNCED] = "DuoMount\nKönyvtár szinkronizálva.\n%d játék található.",
+    /* English: DuoMount: config reloaded. */
+    [SM_L10N_CONFIG_RELOADED] = "DuoMount: a beállítások újratöltve.",
     /* English: Duplicate %s ignored:\n%s\nexisting: %s */
     [SM_L10N_DUPLICATE_IGNORED] = "Duplikált %s kihagyva:\n%s\nlétező: %s",
     /* English: AMPR emulator updated */
     [SM_L10N_AMPR_EMULATOR_UPDATED] = "Az AMPR-emulátor frissítve",
-    /* English: ShadowMount+: failed to install ShellCore hooks */
-    [SM_L10N_SHELLCORE_HOOKS_FAILED] = "ShadowMount+: a ShellCore hookok telepítése sikertelen",
-    /* English: ShadowMount+: kstuff not found; waiting for it to start. */
-    [SM_L10N_KSTUFF_WAITING] = "ShadowMount+: a kstuff nem található; várakozás az indulására",
+    /* English: DuoMount: failed to install ShellCore hooks */
+    [SM_L10N_SHELLCORE_HOOKS_FAILED] = "DuoMount: a ShellCore hookok telepítése sikertelen",
+    /* English: DuoMount: kstuff not found; waiting for it to start. */
+    [SM_L10N_KSTUFF_WAITING] = "DuoMount: a kstuff nem található; várakozás az indulására",
     /* English: Target temperature %u °C → %u °C */
     [SM_L10N_TEMPERATURE_TRANSITION] = "Célhőmérséklet %u °C → %u °C",
     /* English: External drive %s connected\nFree %llu.%llu GB of %llu.%llu (Block size %llu KB)\nGames on drive: %d%s */

@@ -1,13 +1,13 @@
 <p align="center"><img src="assets/duomount-logo.png" width="320" alt="DuoMount logo"></p>
 
-# DuoMount — experimental beta 1
+# DuoMount — v0.1.1-beta.1
 
 A combined PS5 homebrew payload based on **ShadowMountPlus** by drakmor and
 the embedded FPKG runtime from **Kraken Mount** by quer3q. This integration was
 previously named OneMount. It is an independent fork, not an official release
-of either upstream project. Maintained by [ysberke](https://github.com/ysberke).
+of either upstream project. Maintained by [DuoMount](https://github.com/ysberkee).
 
-[Deutsche Beschreibung](README.de.md) · [Downloads](https://github.com/ysberke/DuoMount/releases)
+[Deutsche Beschreibung](README.de.md) · [Downloads](https://github.com/ysberkee/Duomount/releases)
 
 ## Features
 
@@ -15,6 +15,14 @@ of either upstream project. Maintained by [ysberke](https://github.com/ysberke).
 - Existing folder, exFAT, UFS and supported compressed-image handling.
 - Direct PS5 debug FPKG support through the embedded Kraken runtime.
 - One interface on port 10101 and the existing ShadowMount configuration paths.
+
+## Notifications
+
+After the startup library scan, DuoMount shows its own icon, version and detected
+game count. In English the message is `DuoMount ready. / N games detected.`
+The existing library-sync notification setting controls this message, including
+when quiet mode is enabled. It counts supported sources found in the configured
+scan roots. A separate ShadowMountPlus payload is not required for this toast.
 
 ## Requirements and use
 
@@ -115,7 +123,8 @@ unrelated personal information before posting.
 
 ## Branding
 
-Project artwork is available in `assets/duomount-logo.png`. Original upstream
-notification artwork and all original credits are retained separately.
+Project artwork is available in `assets/duomount-logo.png`.
+`assets/duomount-icon.png` is embedded for notifications and the favicon.
+Original upstream artwork and all original credits are retained separately.
 
 [Payload Manager icon setup](docs/PAYLOAD-MANAGER.md)

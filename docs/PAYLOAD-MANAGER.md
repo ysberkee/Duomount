@@ -13,7 +13,7 @@ This project supplies:
 Once the repository and release are publicly reachable, add this source in
 Payload Manager and install DuoMount from that source:
 
-`https://raw.githubusercontent.com/ysberke/DuoMount/main/payloads_v2.json`
+`https://raw.githubusercontent.com/ysberkee/Duomount/main/payloads_v2.json`
 
 The existing local upload remains a separate entry and keeps its generic icon.
 Do not run the local and repository copies together. Finish active transfers

@@ -1,15 +1,15 @@
 static const char *const g_el_gr[SM_L10N_COUNT] = {
     /* English: Go to Debug Settings */
     [SM_L10N_ACTION_DEBUG_SETTINGS] = "Μετάβαση στις ρυθμίσεις αποσφαλμάτωσης",
-    /* English: ShadowMount+ v%s\n© Drakmor and Community */
-    [SM_L10N_STARTUP] = "ShadowMount+ v%s\n© Drakmor και η κοινότητα",
-    /* English: ShadowMount+ v%s\n© Drakmor and Community\nControl: http://%s:%u */
+    /* English: DuoMount v%s\n© Drakmor and Community */
+    [SM_L10N_STARTUP] = "DuoMount v%s\n© Drakmor και η κοινότητα",
+    /* English: DuoMount v%s\n© Drakmor and Community\nControl: http://%s:%u */
     [SM_L10N_STARTUP_WEB] =
-        "ShadowMount+ v%s\n© Drakmor και η κοινότητα\nΈλεγχος: http://%s:%u",
-    /* English: ShadowMount+: recursive_scan=1 is deprecated, using scan_depth=2. */
-    [SM_L10N_RECURSIVE_SCAN_DEPRECATED] = "ShadowMount+: το recursive_scan=1 είναι παρωχημένο, χρησιμοποιείται scan_depth=2.",
-    /* English: ShadowMount+: scan depth %u enabled. */
-    [SM_L10N_SCAN_DEPTH_ENABLED] = "ShadowMount+: ενεργό βάθος σάρωσης %u.",
+        "DuoMount v%s\n© Drakmor και η κοινότητα\nΈλεγχος: http://%s:%u",
+    /* English: DuoMount: recursive_scan=1 is deprecated, using scan_depth=2. */
+    [SM_L10N_RECURSIVE_SCAN_DEPRECATED] = "DuoMount: το recursive_scan=1 είναι παρωχημένο, χρησιμοποιείται scan_depth=2.",
+    /* English: DuoMount: scan depth %u enabled. */
+    [SM_L10N_SCAN_DEPTH_ENABLED] = "DuoMount: ενεργό βάθος σάρωσης %u.",
     /* English: Backport overlay failed: %s\n%s\n0x%08X */
     [SM_L10N_BACKPORT_OVERLAY_FAILED] = "Αποτυχία backport overlay: %s\n%s\n0x%08X",
     /* English: Emulators applied to game: %s */
@@ -54,18 +54,18 @@ static const char *const g_el_gr[SM_L10N_COUNT] = {
     [SM_L10N_MISSING_PARAM] = "Λείπει ή είναι άκυρο το param.json/param.sfo:\n%s",
     /* English: Found %d new games. Processing... */
     [SM_L10N_FOUND_NEW_GAMES] = "Βρέθηκαν %d νέα παιχνίδια. Γίνεται επεξεργασία...",
-    /* English: Library synchronized.\nFound %d games. */
-    [SM_L10N_LIBRARY_SYNCED] = "Η βιβλιοθήκη συγχρονίστηκε.\nΒρέθηκαν %d παιχνίδια.",
-    /* English: ShadowMount+: config reloaded. */
-    [SM_L10N_CONFIG_RELOADED] = "ShadowMount+: οι ρυθμίσεις επαναφορτώθηκαν.",
+    /* English: DuoMount ready.\n%d games detected. */
+    [SM_L10N_LIBRARY_SYNCED] = "DuoMount\nΗ βιβλιοθήκη συγχρονίστηκε.\nΒρέθηκαν %d παιχνίδια.",
+    /* English: DuoMount: config reloaded. */
+    [SM_L10N_CONFIG_RELOADED] = "DuoMount: οι ρυθμίσεις επαναφορτώθηκαν.",
     /* English: Duplicate %s ignored:\n%s\nexisting: %s */
     [SM_L10N_DUPLICATE_IGNORED] = "Το διπλότυπο %s αγνοήθηκε:\n%s\nυπάρχον: %s",
     /* English: AMPR emulator updated */
     [SM_L10N_AMPR_EMULATOR_UPDATED] = "Ο εξομοιωτής AMPR ενημερώθηκε",
-    /* English: ShadowMount+: failed to install ShellCore hooks */
-    [SM_L10N_SHELLCORE_HOOKS_FAILED] = "ShadowMount+: απέτυχε η εγκατάσταση των hooks του ShellCore",
-    /* English: ShadowMount+: kstuff not found; waiting for it to start. */
-    [SM_L10N_KSTUFF_WAITING] = "ShadowMount+: το kstuff δεν βρέθηκε· αναμονή για την εκκίνησή του",
+    /* English: DuoMount: failed to install ShellCore hooks */
+    [SM_L10N_SHELLCORE_HOOKS_FAILED] = "DuoMount: απέτυχε η εγκατάσταση των hooks του ShellCore",
+    /* English: DuoMount: kstuff not found; waiting for it to start. */
+    [SM_L10N_KSTUFF_WAITING] = "DuoMount: το kstuff δεν βρέθηκε· αναμονή για την εκκίνησή του",
     /* English: Target temperature %u °C → %u °C */
     [SM_L10N_TEMPERATURE_TRANSITION] = "Θερμοκρασία-στόχος %u °C → %u °C",
     /* English: External drive %s connected\nFree %llu.%llu GB of %llu.%llu (Block size %llu KB)\nGames on drive: %d%s */

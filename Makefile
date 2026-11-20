@@ -66,8 +66,9 @@ $(KERNEL_SYS_STUB_SO): $(KERNEL_SYS_STUB_SRCS)
 	test -f "$(PS5_SCE_STUBS_DIR)/libkernel_sys.c"
 	$(CC) -shared -Wl,-soname=libkernel_sys.sprx -o $@ $^
 
-src/notify_icon_asset.c: smp_icon.png
-	xxd -i $< > $@
+# Retain the symbol used by the notification and favicon consumers.
+src/notify_icon_asset.c: assets/duomount-icon.png Makefile
+	xxd -i -n smp_icon_png $< > $@
 
 src/config_ini_example_asset.c: config.ini.example
 	xxd -i $< > $@

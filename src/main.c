@@ -615,7 +615,7 @@ int main(void) {
   char firmware_version[32];
   get_firmware_version_string(firmware_version);
   log_debug(
-      "ShadowMount+ v%s exFAT/UFS/PFS/LVD/MD. "
+      "DuoMount v%s exFAT/UFS/PFS/LVD/MD. "
       "FW: %s. "
       "Build: %s. "
       "Thx to VoidWhisper/Gezine/Earthonion/EchoStretch/Drakmor",
