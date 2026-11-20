@@ -82,17 +82,13 @@ vertrauenswürdigen Heimnetz verwenden.
 
 Der OneMount-Vorgänger wurde auf **einer PS5 mit Firmware 13.60 und OnionHEN**
 getestet. Der Anwender meldete **neun erkannte Spiele** und erfolgreiche
-Spielstarttests bei allen bisher getesteten Spielen **außer GTA V**. Das ist ein
+Spielstarttests bei mehreren Titeln. Das ist ein
 Anwenderbericht und keine allgemeine Kompatibilitätsgarantie. Der umbenannte
 DuoMount-Build benötigt noch einen eigenen Konsolentest.
 
 Technische Mount-/Unmount-Tests bestanden für zwei FPKGs, ein exFAT-Image,
 einen FFPFSC-Container und einen Ordner. Die lokalen Build-/Format-/Cache- und
 Mount-Prüfungen ersetzen keine längeren Spieltests.
-
-**Bekannter Fehler:** GTA V, PPSA04264, Version 01.011.001, stürzt mit
-CE-108255-1 ab. Das Log zeigte SIGBUS / General Protection Fault im RAGE Main
-Thread. Die Ursache ist offen; beschädigte Spieldateien sind nicht nachgewiesen.
 
 Weitere Grenzen:
 
@@ -126,3 +122,5 @@ Die ursprünglichen Copyright-Vermerke, Credits und Lizenztexte bleiben erhalten
 Das Projektlogo liegt unter `assets/duomount-logo.png`. Die ursprünglichen
 Upstream-Grafiken und Credits sind separat erhalten. Spiele, Spielstände,
 private Logs und Konsolen-Backups gehören nicht zur Veröffentlichung.
+
+[Payload Manager icon setup](docs/PAYLOAD-MANAGER.md)

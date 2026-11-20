@@ -1,0 +1,19 @@
+{
+  "name": "DuoMount",
+  "icons_url": "icons.json",
+  "payloads": [
+    {
+      "id": "duomount",
+      "name": "DuoMount",
+      "filename": "duomount.elf",
+      "version": "v0.1.0-beta.1",
+      "url": "https://github.com/ysberke/DuoMount/releases/download/v0.1.0-beta.1/duomount.elf",
+      "source": "https://github.com/ysberke/DuoMount",
+      "source_direct": "https://github.com/ysberke/DuoMount/releases/tag/v0.1.0-beta.1",
+      "description": "Combined ShadowMountPlus host with embedded Kraken Mount PS5 FPKG runtime. Experimental beta.",
+      "category": "Utilities & Tools",
+      "checksum": "14f1651d38e848b118b1a809fe81281634ecf2ddbd417f34beb98ea2b0d55385",
+      "icon_key": "ca32975cca7bd73f6a3ddaaff0fab6df1d5d50ce5d24c2afeea0cd5529309955"
+    }
+  ]
+}

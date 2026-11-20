@@ -37,15 +37,12 @@ Use the web interface only on a trusted LAN: its management API has no authentic
 
 This is an **experimental beta**, not a general compatibility guarantee.
 The predecessor OneMount beta 1 ran on one PS5 with firmware 13.60 / OnionHEN.
-The user reported nine detected games and successful launch tests for every
-currently tested game except GTA V. This is a single-user report, not a
+The user reported nine detected games and successful launch tests for multiple
+titles. This is a single-user report, not a
 compatibility guarantee. The renamed build still requires its own console smoke test.
 
 - Mount/unmount checks passed for two FPKGs, an exFAT image, an FFPFSC
   container and a folder in the predecessor build.
-- **Known issue: GTA V (PPSA04264, 01.011.001) crashes with CE-108255-1.**
-  The observed log reports SIGBUS / general protection fault in the RAGE main
-  thread. The cause is unresolved; a source-file defect has not been established.
 - Incomplete transfers, retail packages and LIH patches are not supported
   direct FPKG sources. This direct mount feature is for supported PS5 debug
   packages; PS4 packages continue to use their existing installation workflow.
@@ -120,3 +117,5 @@ unrelated personal information before posting.
 
 Project artwork is available in `assets/duomount-logo.png`. Original upstream
 notification artwork and all original credits are retained separately.
+
+[Payload Manager icon setup](docs/PAYLOAD-MANAGER.md)
