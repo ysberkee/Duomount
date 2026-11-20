@@ -1,0 +1,2776 @@
+openapi: 3.1.2
+info:
+  title: ShadowMount HTTP API
+  version: "1"
+  description: |
+    HTTP/JSON API exposed by the ShadowMountPlus payload. The service has no
+    authentication and should only be exposed on a trusted network.
+servers:
+  - url: http://127.0.0.1:10101
+    description: Local endpoint on the PS5; the default listener also accepts network connections
+  - url: http://{address}:{port}
+    description: Configured network endpoint
+    variables:
+      address:
+        default: 192.168.1.50
+        description: PS5 IPv4 address or hostname
+      port:
+        default: "10101"
+        description: Value of api_port
+security: []
+tags:
+  - name: Service
+  - name: Storage
+  - name: Scanner
+  - name: Manual sources
+  - name: Images
+  - name: Games
+  - name: Packages
+  - name: Settings
+
+paths:
+  /:
+    options:
+      operationId: preflightIndex
+      summary: CORS preflight
+      tags: [Service]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    get:
+      operationId: getWebInterface
+      summary: Get the optional web interface
+      description: Serves /data/shadowmount/index.html when it is a regular file.
+      tags: [Service]
+      responses:
+        "200":
+          description: ShadowMount web interface
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/AllowOrigin"
+          content:
+            text/html:
+              schema:
+                type: string
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/version:
+    options:
+      operationId: preflightVersion
+      summary: CORS preflight
+      tags: [Service]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: getVersion
+      summary: Get API version and capabilities
+      tags: [Service]
+      requestBody:
+        $ref: "#/components/requestBodies/EmptyRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/VersionSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "411":
+          $ref: "#/components/responses/LengthRequired"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "431":
+          $ref: "#/components/responses/HeadersTooLarge"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "501":
+          $ref: "#/components/responses/NotImplemented"
+
+  /api/v1/images:
+    options:
+      operationId: preflightImages
+      summary: CORS preflight
+      tags: [Images]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: listImages
+      summary: Get the complete image snapshot
+      tags: [Images]
+      requestBody:
+        $ref: "#/components/requestBodies/EmptyRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/ImagesSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "411":
+          $ref: "#/components/responses/LengthRequired"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "431":
+          $ref: "#/components/responses/HeadersTooLarge"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "501":
+          $ref: "#/components/responses/NotImplemented"
+
+  /api/v1/storage/eject:
+    options:
+      operationId: preflightStorageEject
+      summary: CORS preflight
+      tags: [Storage]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: ejectUsbStorage
+      summary: Safely unmount external USB storage through ShellCore
+      description: Uses the storage job queue; completed means the kernel mount is gone. Keep the drive connected if completion is unconfirmed. Never automatically retried.
+      tags: [Storage]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [path, source, mount_id]
+              additionalProperties: false
+              properties:
+                path:
+                  type: string
+                  pattern: '^/mnt/(usb[0-7]|ext0)$'
+                source:
+                  type: string
+                  minLength: 1
+                  maxLength: 1023
+                  description: Exact source from the storage listing; stale mounts are rejected.
+                mount_id:
+                  type: string
+                  pattern: '^[0-9a-fA-F]{16}$'
+                  description: Opaque filesystem identity echoed unchanged from the same storage listing.
+      responses:
+        "202":
+          $ref: "#/components/responses/StorageJobAccepted"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Busy"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/storage:
+    options:
+      operationId: preflightStorage
+      summary: CORS preflight
+      tags: [Storage]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: getStorageSpace
+      summary: Get local storage listings or capacity for one SMB path
+      tags: [Storage]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                path:
+                  type: string
+                  pattern: "^smb://"
+                  maxLength: 1023
+                  description: Optional active SMB alias path. Queries only this path; omitted returns the local storage list and active SMB destinations without contacting SMB servers.
+      responses:
+        "200":
+          $ref: "#/components/responses/StorageSpaceSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "411":
+          $ref: "#/components/responses/LengthRequired"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "431":
+          $ref: "#/components/responses/HeadersTooLarge"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "501":
+          $ref: "#/components/responses/NotImplemented"
+
+  /api/v1/scan:
+    options:
+      operationId: preflightScan
+      summary: CORS preflight
+      tags: [Scanner]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: rescan
+      summary: Queue an immediate full rescan
+      description: Retry counters are preserved by default. With reset_attempts=true, all title registration/install-remount and path-owned image-mount retry counters are reset immediately before the requested scan starts. If game runtime mounts are busy, the request remains queued until scanning is safe.
+      tags: [Scanner]
+      requestBody:
+        $ref: "#/components/requestBodies/ScanRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/ScanSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Busy"
+        "411":
+          $ref: "#/components/responses/LengthRequired"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "431":
+          $ref: "#/components/responses/HeadersTooLarge"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "501":
+          $ref: "#/components/responses/NotImplemented"
+
+  /api/v1/manual/list:
+    options:
+      operationId: preflightListManualSources
+      summary: CORS preflight
+      tags: [Manual sources]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: listManualSources
+      summary: List direct game source paths from manual.lst
+      description: Entries identify individual game folders or images, not recursive scan roots. Comments and empty lines are omitted.
+      tags: [Manual sources]
+      requestBody:
+        $ref: "#/components/requestBodies/EmptyRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/ManualListSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "411":
+          $ref: "#/components/responses/LengthRequired"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "431":
+          $ref: "#/components/responses/HeadersTooLarge"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "501":
+          $ref: "#/components/responses/NotImplemented"
+
+  /api/v1/manual/add:
+    options:
+      operationId: preflightAddManualSource
+      summary: CORS preflight
+      tags: [Manual sources]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: addManualSource
+      summary: Add a source path to manual.lst
+      tags: [Manual sources]
+      requestBody:
+        $ref: "#/components/requestBodies/ManualPathRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/ManualUpdateSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "411":
+          $ref: "#/components/responses/LengthRequired"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "431":
+          $ref: "#/components/responses/HeadersTooLarge"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "501":
+          $ref: "#/components/responses/NotImplemented"
+
+  /api/v1/manual/remove:
+    options:
+      operationId: preflightRemoveManualSource
+      summary: CORS preflight
+      tags: [Manual sources]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: removeManualSource
+      summary: Remove all matching source lines from manual.lst
+      tags: [Manual sources]
+      requestBody:
+        $ref: "#/components/requestBodies/ManualPathRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/ManualUpdateSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "411":
+          $ref: "#/components/responses/LengthRequired"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "431":
+          $ref: "#/components/responses/HeadersTooLarge"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "501":
+          $ref: "#/components/responses/NotImplemented"
+
+  /api/v1/games:
+    options:
+      operationId: preflightGames
+      summary: CORS preflight
+      tags: [Games]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: listGames
+      summary: Get the complete game snapshot
+      tags: [Games]
+      requestBody:
+        $ref: "#/components/requestBodies/GamesListRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/GamesSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "411":
+          $ref: "#/components/responses/LengthRequired"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "431":
+          $ref: "#/components/responses/HeadersTooLarge"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "501":
+          $ref: "#/components/responses/NotImplemented"
+
+  /api/v1/games/info:
+    options:
+      operationId: preflightGameInfo
+      summary: CORS preflight
+      tags: [Games]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: getGameInfo
+      summary: Get detailed metadata and size for a folder, image or installed PKG
+      tags: [Games]
+      requestBody:
+        $ref: "#/components/requestBodies/TitleRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/GameInfoSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Busy"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/games/fakelib:
+    options:
+      operationId: preflightGameFakelib
+      summary: CORS preflight
+      tags: [Games]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: setGameFakelib
+      summary: Set the fakelib mode or global overlay exclusion for a PS5 game on its next launch
+      tags: [Games]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title_id]
+              oneOf:
+                - anyOf:
+                    - required: [mode]
+                    - required: [enabled]
+                  not:
+                    required: [ignore_global_fakelib]
+                - required: [ignore_global_fakelib]
+                  not:
+                    anyOf:
+                      - required: [mode]
+                      - required: [enabled]
+              properties:
+                title_id:
+                  $ref: "#/components/schemas/TitleId"
+                  description: Must identify a PS5 game; homebrew uses its app.db platform.
+                mode:
+                  type: string
+                  enum: [default, full, emulators, disabled]
+                  description: Default removes the title override; other modes override fakelib_default_mode. Takes precedence over enabled.
+                enabled:
+                  type: boolean
+                  description: Legacy alternative selecting explicit full when true or disabled when false.
+                ignore_global_fakelib:
+                  type: boolean
+                  description: Update only the global overlay exclusion. False removes it. Cannot be combined with mode or enabled.
+      responses:
+        "200":
+          description: Per-title policy saved; existing mounts are preserved
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, title_id, fakelib_mode, fakelib_mode_override, fakelib_default_mode, fakelib_enabled, fakelib_effective_enabled, ignore_global_fakelib, saved, applies_on_next_launch]
+                properties:
+                  status:
+                    type: integer
+                    const: 0
+                  title_id:
+                    $ref: "#/components/schemas/TitleId"
+                  fakelib_mode:
+                    type: string
+                    enum: [full, emulators, disabled]
+                  fakelib_mode_override:
+                    type: string
+                    enum: [default, full, emulators, disabled]
+                  fakelib_default_mode:
+                    type: string
+                    enum: [full, emulators, disabled]
+                  fakelib_enabled:
+                    type: boolean
+                  fakelib_effective_enabled:
+                    type: boolean
+                  ignore_global_fakelib:
+                    type: boolean
+                  saved:
+                    type: boolean
+                    const: true
+                  applies_on_next_launch:
+                    type: boolean
+                    const: true
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "507":
+          description: Title override list is full; configuration was not changed
+
+  /api/v1/games/icon:
+    get:
+      operationId: getGameIcon
+      summary: Stream an original game icon or a cached responsive variant
+      tags: [Games]
+      parameters:
+        - name: title_id
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/TitleId"
+        - name: size
+          in: query
+          required: false
+          description: Optional maximum edge. thumb is a legacy 128px PNG; card (256px) and cover (512px) prefer JPEG for opaque icons and PNG for alpha or more efficient lossless encoding. Smaller sources are not enlarged.
+          schema:
+            type: string
+            enum: [thumb, card, cover]
+      responses:
+        "200":
+          description: Original PNG or cached JPEG/PNG icon
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: "#/components/headers/AllowOrigin"
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/settings:
+    options:
+      operationId: preflightGetSettings
+      summary: CORS preflight
+      tags: [Settings]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: getSettings
+      summary: Read web-managed settings and recursive scan roots
+      tags: [Settings]
+      requestBody:
+        $ref: "#/components/requestBodies/EmptyRequest"
+      responses:
+        "200":
+          description: Current runtime settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SettingsResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/settings/update:
+    options:
+      operationId: preflightUpdateSettings
+      summary: CORS preflight
+      tags: [Settings]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: updateSettings
+      summary: Atomically update web-managed config.ini keys
+      description: Preserves unrelated keys and comments, then queues scanner-owned runtime reload.
+      tags: [Settings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SettingsUpdateRequest"
+      responses:
+        "200":
+          description: Settings saved and reload queued
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/debug-log:
+    options:
+      operationId: preflightGetDebugLog
+      summary: CORS preflight
+      tags: [Settings]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: getDebugLog
+      summary: Read a bounded tail of debug.log
+      tags: [Settings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                max_bytes:
+                  type: integer
+                  minimum: 4096
+                  maximum: 262144
+                  default: 131072
+      responses:
+        "200":
+          description: Debug log tail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DebugLogResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/kernel-log:
+    options:
+      operationId: preflightGetKernelLog
+      summary: CORS preflight
+      tags: [Settings]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: getKernelLog
+      summary: Read recent events from the SDK log stream used by crash detection
+      description: Uses the sceKernelDebugGetSdkLogText snapshot shared with crash detection.
+      tags: [Settings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                max_bytes:
+                  type: integer
+                  minimum: 4096
+                  maximum: 262144
+                  default: 131072
+      responses:
+        "200":
+          description: SDK kernel-log tail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KernelLogResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/games/move:
+    options:
+      operationId: preflightMoveGameSource
+      summary: CORS preflight
+      tags: [Storage]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: moveGameSource
+      summary: Move a game folder or backing image, including across filesystems
+      tags: [Storage]
+      requestBody:
+        $ref: "#/components/requestBodies/StorageDestinationRequest"
+      responses:
+        "202":
+          $ref: "#/components/responses/StorageJobAccepted"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Busy"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "507":
+          $ref: "#/components/responses/InsufficientStorage"
+
+  /api/v1/games/copy:
+    options:
+      operationId: preflightCopyGameSource
+      summary: CORS preflight
+      tags: [Storage]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: copyGameSource
+      summary: Copy a game folder or backing image
+      tags: [Storage]
+      requestBody:
+        $ref: "#/components/requestBodies/StorageDestinationRequest"
+      responses:
+        "202":
+          $ref: "#/components/responses/StorageJobAccepted"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Busy"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "507":
+          $ref: "#/components/responses/InsufficientStorage"
+
+  /api/v1/games/unpack:
+    options:
+      operationId: preflightUnpackGameImage
+      summary: CORS preflight
+      tags: [Storage]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: unpackGameImage
+      summary: Mount an image read-only and copy its game tree into a folder
+      tags: [Storage]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StorageUnpackRequest"
+      responses:
+        "202":
+          $ref: "#/components/responses/StorageJobAccepted"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Busy"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "501":
+          $ref: "#/components/responses/NotImplemented"
+        "507":
+          $ref: "#/components/responses/InsufficientStorage"
+
+  /api/v1/games/storage/status:
+    options:
+      operationId: preflightStorageJobStatus
+      summary: CORS preflight
+      tags: [Storage]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: getStorageJobStatus
+      summary: Get the current or last storage job
+      tags: [Storage]
+      requestBody:
+        $ref: "#/components/requestBodies/StorageJobStatusRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/StorageJobStatusSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/games/storage/cancel:
+    options:
+      operationId: preflightStorageJobCancel
+      summary: CORS preflight
+      tags: [Storage]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: cancelStorageJob
+      summary: Cancel an active storage job before its irreversible phase
+      tags: [Storage]
+      requestBody:
+        $ref: "#/components/requestBodies/StorageJobCancelRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/StorageJobStatusSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Busy"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/games/delete:
+    options:
+      operationId: preflightDeleteGameSource
+      summary: CORS preflight
+      tags: [Storage]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: deleteGameSource
+      summary: Asynchronously delete a game folder or backing image
+      description: A confirmed request for a cached source that is already absent queues safe scanner reconciliation without starting a storage job or directly uninstalling the title. Absence may also mean disconnected storage. Permission and I/O errors remain failures.
+      tags: [Storage]
+      requestBody:
+        $ref: "#/components/requestBodies/StorageDeleteRequest"
+      responses:
+        "200":
+          description: Source already absent; library reconciliation queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MissingSourceResponse"
+        "202":
+          $ref: "#/components/responses/StorageJobAccepted"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Busy"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/games/mount:
+    options:
+      operationId: preflightMountGame
+      summary: CORS preflight
+      tags: [Games]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: mountGame
+      summary: Mount a managed game
+      tags: [Games]
+      requestBody:
+        $ref: "#/components/requestBodies/MountRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/MountSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Busy"
+        "411":
+          $ref: "#/components/responses/LengthRequired"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "431":
+          $ref: "#/components/responses/HeadersTooLarge"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "501":
+          $ref: "#/components/responses/NotImplemented"
+
+  /api/v1/games/unmount:
+    options:
+      operationId: preflightUnmountGame
+      summary: CORS preflight
+      tags: [Games]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: unmountGame
+      summary: Unmount a managed game
+      tags: [Games]
+      requestBody:
+        $ref: "#/components/requestBodies/TitleRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/UnmountSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Busy"
+        "411":
+          $ref: "#/components/responses/LengthRequired"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "431":
+          $ref: "#/components/responses/HeadersTooLarge"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "501":
+          $ref: "#/components/responses/NotImplemented"
+
+  /api/v1/games/uninstall:
+    options:
+      operationId: preflightUninstallGame
+      summary: CORS preflight
+      tags: [Games]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: uninstallGame
+      summary: Request game uninstallation
+      tags: [Games]
+      requestBody:
+        $ref: "#/components/requestBodies/TitleRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/UninstallSuccess"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Busy"
+        "411":
+          $ref: "#/components/responses/LengthRequired"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "431":
+          $ref: "#/components/responses/HeadersTooLarge"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "501":
+          $ref: "#/components/responses/NotImplemented"
+
+  /api/v1/games/content/uninstall:
+    options:
+      operationId: preflightUninstallGameContent
+      summary: CORS preflight
+      tags: [Games]
+      responses:
+        "204":
+          $ref: "#/components/responses/Preflight"
+    post:
+      operationId: uninstallGameContent
+      summary: Delete the installed patch or one installed DLC
+      description: Uses AppUnInstallPat or AppUnInstallAddcont without deleting the base game. DLC content_id must belong to title_id and have native installed state 4. Other titles may be modified during gameplay. Blocked for the live title, a prepared or mounted target, rest mode, launch/exit transitions, scanning and storage/install operations. Successful deletion invalidates app.db metadata; clients should reload game information and sizes.
+      tags: [Games]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title_id, kind]
+              properties:
+                title_id: {$ref: '#/components/schemas/TitleId'}
+                kind: {type: string, enum: [patch, dlc]}
+                content_id: {type: string, minLength: 21, maxLength: 47, description: Required for DLC; full content ID of the selected add-on}
+      responses:
+        "200":
+          description: Content uninstallation accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, title_id, kind, uninstall_requested]
+                properties:
+                  status: {type: integer, enum: [0]}
+                  title_id: {type: string}
+                  kind: {type: string, enum: [patch, dlc]}
+                  content_id: {type: string, description: Present for DLC}
+                  uninstall_requested: {type: boolean, enum: [true]}
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Busy"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/smb:
+    post:
+      operationId: manageSmbConnections
+      summary: Manage and check named SMB2/SMB3 connections
+      tags: [Settings]
+      description: Up to 16 connections. Save/remove are refused during active storage jobs or queued PKGs. Check authenticates and verifies directory access without saving. Passwords are never returned. Active aliases appear as smb://<name> in browsing and transfer destinations. SMB1 is disabled.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action: {type: string, enum: [list, save, remove, check], default: list}
+                previous_name: {type: string, maxLength: 63, description: Saved connection to edit or check}
+                name: {type: string, maxLength: 63}
+                path: {type: string, maxLength: 1023, description: 'Actual smb://server/share[/folder] address; required for save/check'}
+                username: {type: string, maxLength: 255, description: Empty uses Guest; DOMAIN\user is supported}
+                password: {type: string, maxLength: 511, writeOnly: true, description: Omit to preserve the saved password; empty explicitly clears it}
+                active: {type: boolean, default: true}
+      responses:
+        "200":
+          description: Connection list or successful mutation/check
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, dialect, connections]
+                properties:
+                  status: {type: integer, const: 0}
+                  dialect: {type: integer, description: Negotiated dialect for check; otherwise zero}
+                  connections:
+                    type: array
+                    maxItems: 16
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required: [name, path, username, active, password_set]
+                      properties:
+                        name: {type: string}
+                        path: {type: string}
+                        username: {type: string}
+                        active: {type: boolean}
+                        password_set: {type: boolean}
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Busy"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/packages:
+    post:
+      operationId: listPackages
+      summary: Browse one folder of package sources
+      tags: [Packages]
+      description: Internal /data, mounted USB/ext drives and active named SMB connections are allowed; /data/pkgs remains a shortcut. Installed app/patch/addcont trees are excluded. Lists at most 256 native or 32 SMB entries per page without recursion; advance by the returned limit.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path: {type: string, default: ""}
+                offset: {type: integer, minimum: 0, maximum: 1000000, default: 0}
+      responses:
+        "200":
+          description: Successful package request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PackageListing"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Busy"
+
+  /api/v1/sources/install:
+    post:
+      operationId: installGameSource
+      summary: Copy a game folder or intact image to a selected destination
+      description: Uses the shared cancellable storage job without a queue. Preserves the source and original filename, refuses existing targets and source descendants, protects active games, adds the copied path to manual.lst and requests a scan. Directory destinations are restricted to managed data and mounted USB/ext storage, excluding native installed-content trees and runtime image mounts.
+      tags: [Games]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [path, destination_dir]
+              properties:
+                path: {type: string, description: Native or named smb:// path to a supported image or game folder}
+                destination_dir: {type: string, description: Existing writable parent directory for the new copy}
+      responses:
+        "202":
+          description: Source installation accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorageJobResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Busy"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/files/mkdir:
+    post:
+      operationId: createBrowserDirectory
+      summary: Create one directory in a browser-selected local or SMB parent
+      tags: [Storage]
+      description: Resolves an existing directory beneath the browser roots, checks create access and system-path protection, and creates one child without overwriting. Scan roots may contain newly created directories. Does not trigger a scan or registration.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [path, name]
+              properties:
+                path: {type: string, maxLength: 1023, pattern: "^(/|smb://)", description: Existing parent directory}
+                name: {type: string, minLength: 1, maxLength: 255, description: Single folder component, at most 255 UTF-8 bytes; separators, control characters and reserved characters are rejected}
+      responses:
+        "200":
+          description: Directory created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, path]
+                properties:
+                  status: {type: integer, const: 0}
+                  path: {type: string, description: Full path of the created directory}
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Busy"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/sources/delete:
+    post:
+      operationId: deleteBrowserSource
+      summary: Delete a browser-selected folder, image or PKG
+      description: Uses the shared storage worker. Requires confirm=true. SMB alias roots and local storage roots cannot be deleted. Local system paths and read-only destinations are protected. Folders/images in or containing scan roots are protected; PKGs may be removed from scan roots. Policy is rechecked in the worker before deletion. Queued PKGs block deletion. Recursive deletion cannot be cancelled once it begins.
+      tags: [Storage]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [path, confirm]
+              properties:
+                path: {type: string, maxLength: 1023, pattern: "^(/|smb://)"}
+                confirm: {type: boolean, const: true}
+      responses:
+        "202":
+          description: Asynchronous deletion accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorageJobResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Busy"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/backports/install:
+    post:
+      operationId: installBackport
+      summary: Copy a detected backport into the internal backports folder
+      tags: [Packages]
+      description: Requires a directory named PPSA or CUSA followed by five digits and any suffix, a fakelib subdirectory and no sce_sys/keystone. Copies to /data/homebrew/backports with the original name. Existing destinations are replaced after staging a complete copy; failed or cancelled copies preserve the installed version. The final rename step closes cancellation and restores the previous directory if publishing fails. Source and destination must not overlap. Uses the shared storage job with operation=copy and source_type=backport.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [path]
+              properties:
+                path: {type: string}
+      responses:
+        "202":
+          description: Backport copy accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorageJobResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Busy"
+
+  /api/v1/backports/delete:
+    post:
+      operationId: deleteBackport
+      summary: Delete the selected backport directory and its contents
+      tags: [Packages]
+      description: Validates the selected directory as a backport and deletes that exact path through the shared storage worker. Does not redirect to the internal installed copy. Existing mutation and active-game guards apply. The job uses operation=delete and source_type=backport. Preparation can be cancelled; recursive deletion cannot be cancelled once started.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [path]
+              properties:
+                path: {type: string}
+      responses:
+        "202":
+          description: Backport deletion accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorageJobResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Busy"
+
+  /api/v1/files:
+    post:
+      operationId: browseFiles
+      summary: Browse drives and select a directory or a game source
+      tags: [Storage]
+      description: Read-only path picker. Uses the same drive restrictions and pagination as the package browser, without parsing package metadata. Installed content trees and symlinks are excluded; /user is not a browse root. Entries have installable=false.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path: {type: string, default: ""}
+                offset: {type: integer, minimum: 0, maximum: 1000000, default: 0}
+                include_files: {type: boolean, default: false}
+      responses:
+        "200":
+          description: Directories and optionally regular files
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PackageListing"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          description: Path is outside the supported browse roots
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/v1/packages/icon:
+    get:
+      operationId: getPackageIcon
+      summary: Read icon0.png from a local PKG or game directory
+      tags: [Packages]
+      parameters:
+        - {in: query, name: path, required: true, schema: {type: string, maxLength: 1023}}
+        - {in: query, name: v, schema: {type: string}, description: Source revision for browser caching.}
+        - {in: query, name: source_type, schema: {type: string, enum: [folder]}, description: Read sce_sys/icon0.png from a directory when folder; omit for PKGs.}
+      responses:
+        "200":
+          description: Bounded PNG artwork from an allowed package source (up to 4 MiB).
+          content:
+            image/png:
+              schema: {type: string, format: binary}
+        "404":
+          description: Package or artwork not available.
+
+  /api/v1/packages/queue:
+    post:
+      operationId: updatePackageQueue
+      summary: Manage the payload-owned sequential local PKG queue
+      tags: [Packages]
+      description: Up to 32 remaining packages, including the active entry. Queued bases permit adding their patches and DLC. Entries are removed only after successful installation. Errors, cancellation and rest mode stop the batch and retain the interrupted entry and following entries for manual restart. Clear removes waiting entries; the active entry cannot be removed. Start uses the shared storage job. Browser closure does not stop the batch.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action: {type: string, enum: [status, add, remove, clear, start], default: status}
+                path: {type: string, maxLength: 1023, description: Required for add and remove.}
+                only_if_idle: {type: boolean, default: false, description: For clear; refuse without changing entries if a storage job is active or the service is stopping.}
+      responses:
+        "200":
+          description: Remaining queue (including an active entry) and batch state.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PackageQueue"
+        "202":
+          description: Batch started in the shared storage worker.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorageJobResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Busy"
+
+  /api/v1/packages/install:
+    post:
+      operationId: installPackage
+      summary: Install a local PKG through AppInstUtil
+      tags: [Packages]
+      description: Passes the local filesystem path directly to AppInstUtil without an HTTP proxy. Paths under /data/ use the /user/data/ alias. Shares the storage job slot and mutation gates. Patches and DLC require an installed base game. No automatic retry or deletion of the source.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [path]
+              properties:
+                path: {type: string, maxLength: 1023}
+      responses:
+        "202":
+          description: Successful package request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorageJobResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Busy"
+
+  /api/v1/packages/stream:
+    post:
+      operationId: streamPackage
+      summary: Open a RAM-backed browser package source
+      tags: [Packages]
+      description: Returns a private token and stream_port. Connect to ws://console:stream_port/token/ws for a two-block binary range stream (uint64 little-endian ID followed by bytes). A 32 MiB RAM cache retains aligned 512 KiB segments; speculative reads preserve unread data; no staging PKG is written. HTTP range endpoints remain available for compatibility. Keep the source page open until installation ends.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, size]
+              properties:
+                name: {type: string, maxLength: 255}
+                size: {type: integer, format: int64, minimum: 1}
+      responses:
+        "202":
+          description: Successful package request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PackageStreamResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Busy"
+
+  /api/v1/packages/stream/request:
+    post:
+      operationId: requestPackageRange
+      summary: Claim a range requested by the package installer
+      tags: [Packages]
+      description: Returns immediately without blocking an HTTP worker. id=0 means no pending range; browser clients wait 16?100 ms before polling again. Stable client IDs reclaim an unacknowledged range. Session expiration returns 404 or 410. The web UI uses two clients.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token: {type: string, minLength: 32, maxLength: 32}
+                client: {type: integer, minimum: 1, maximum: 4, description: Stable source client for reclaiming unacknowledged ranges.}
+      responses:
+        "200":
+          description: Successful package request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PackageRange"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Busy"
+
+  /api/v1/packages/stream/chunk:
+    post:
+      operationId: replyPackageRange
+      summary: Supply one requested range without writing to disk
+      tags: [Packages]
+      parameters:
+        - {name: token, in: query, required: true, schema: {type: string, minLength: 32, maxLength: 32}}
+        - {name: id, in: query, required: true, schema: {type: integer, minimum: 1}}
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema: {type: string, format: binary, maxLength: 524288}
+      responses:
+        "200":
+          description: Range accepted; response contains status=0.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "413":
+          description: Range exceeds 512 KiB.
+
+components:
+  requestBodies:
+    EmptyRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+          example: {}
+    GamesListRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GamesListRequest"
+    ScanRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ScanRequest"
+    TitleRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TitleRequest"
+    MountRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/MountRequest"
+    ManualPathRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ManualPathRequest"
+    StorageDestinationRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/StorageDestinationRequest"
+    StorageDeleteRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/StorageDeleteRequest"
+    StorageJobStatusRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/StorageJobStatusRequest"
+    StorageJobCancelRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/StorageJobCancelRequest"
+
+  headers:
+    AllowOrigin:
+      description: Browser origins allowed to access the API
+      schema:
+        type: string
+        const: "*"
+    AllowMethods:
+      description: Methods allowed by CORS preflight
+      schema:
+        type: string
+        const: GET, POST, OPTIONS
+    AllowHeaders:
+      description: Request headers allowed by CORS preflight
+      schema:
+        type: string
+        const: Content-Type
+    AllowPrivateNetwork:
+      description: Private Network Access permission
+      schema:
+        type: string
+        const: "true"
+    MaxAge:
+      description: Number of seconds for which the preflight may be cached
+      schema:
+        type: integer
+        const: 86400
+
+  responses:
+    Preflight:
+      description: CORS preflight accepted
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+        Access-Control-Allow-Methods:
+          $ref: "#/components/headers/AllowMethods"
+        Access-Control-Allow-Headers:
+          $ref: "#/components/headers/AllowHeaders"
+        Access-Control-Allow-Private-Network:
+          $ref: "#/components/headers/AllowPrivateNetwork"
+        Access-Control-Max-Age:
+          $ref: "#/components/headers/MaxAge"
+
+    VersionSuccess:
+      description: API version and capabilities
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/VersionResponse"
+
+    ImagesSuccess:
+      description: Complete image snapshot
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ImagesResponse"
+
+    StorageSpaceSuccess:
+      description: Capacity and free space for mounted storage filesystems
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/StorageSpaceResponse"
+              - $ref: "#/components/schemas/SmbStorageSpaceResponse"
+
+    GamesSuccess:
+      description: Complete game snapshot
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GamesResponse"
+
+    GameInfoSuccess:
+      description: Detailed managed game metadata and physical source size
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GameInfoResponse"
+
+    StorageJobAccepted:
+      description: Copy, move, delete or unpack job accepted for asynchronous execution
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/StorageJobResponse"
+
+    StorageJobStatusSuccess:
+      description: Current or last copy, move, delete or unpack job status
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/StorageJobResponse"
+
+    ScanSuccess:
+      description: Full rescan queued
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ScanResponse"
+
+    ManualUpdateSuccess:
+      description: manual.lst update completed
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ManualUpdateResponse"
+
+    ManualListSuccess:
+      description: Parsed manual.lst source paths
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ManualListResponse"
+
+    MountSuccess:
+      description: Game mounted
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/MountResponse"
+
+    UnmountSuccess:
+      description: Game unmounted
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UnmountResponse"
+
+    UninstallSuccess:
+      description: Game uninstallation was accepted by AppInstUtil
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UninstallResponse"
+
+    BadRequest:
+      description: Invalid HTTP request, JSON body or title ID
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: The source or destination is not allowed
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Managed title tracker was not found
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Busy:
+      description: Runtime state does not currently permit the operation
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            status: 16
+            error: Device busy
+    LengthRequired:
+      description: Content-Length is required
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    PayloadTooLarge:
+      description: JSON request body exceeds 4096 bytes
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    UnsupportedMediaType:
+      description: Content-Type is not application/json
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    HeadersTooLarge:
+      description: HTTP headers exceed 8192 bytes
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalError:
+      description: Internal failure
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotImplemented:
+      description: Unsupported transfer encoding or runtime operation
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    InsufficientStorage:
+      description: The destination filesystem has insufficient free space
+      headers:
+        Access-Control-Allow-Origin:
+          $ref: "#/components/headers/AllowOrigin"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  schemas:
+    TitleId:
+      type: string
+      minLength: 9
+      maxLength: 9
+      pattern: "^(?!NPXS)[A-Z]{4}[0-9]{5}$"
+      description: PS4 (CUSA), PS5 (PPSA), or homebrew title ID. NPXS system apps are excluded.
+      examples: [PPSA12345, HBRW12345]
+
+    TitleRequest:
+      type: object
+      required: [title_id]
+      properties:
+        title_id:
+          $ref: "#/components/schemas/TitleId"
+
+    GamesListRequest:
+      type: object
+      properties:
+        include_size:
+          type: boolean
+          default: false
+          description: Calculate every physical source size. Directory traversal can be slow.
+
+    ScanRequest:
+      type: object
+      properties:
+        reset_attempts:
+          type: boolean
+          default: false
+          description: Reset title install/mount and image-mount retry counters immediately before this requested full scan starts.
+
+    MountRequest:
+      type: object
+      required: [title_id]
+      properties:
+        title_id:
+          $ref: "#/components/schemas/TitleId"
+        mode:
+          type: string
+          enum: [ro, rw, r/o, r/w]
+          description: Optional request-scoped mode for every image layer needed by this mount.
+
+    ManualPathRequest:
+      type: object
+      required: [path]
+      properties:
+        path:
+          type: string
+          pattern: "^/.+"
+          maxLength: 1023
+
+    StorageDestinationRequest:
+      type: object
+      required: [title_id, destination_dir]
+      properties:
+        title_id:
+          $ref: "#/components/schemas/TitleId"
+        destination_dir:
+          type: string
+          pattern: "^(/.+|smb://.+)$"
+          maxLength: 1023
+          description: Existing directory under a configured non-runtime scan root or active named SMB connection. The original source basename is preserved.
+
+    StorageDeleteRequest:
+      type: object
+      required: [title_id, confirm]
+      properties:
+        title_id:
+          $ref: "#/components/schemas/TitleId"
+        confirm:
+          type: boolean
+          const: true
+
+    StorageUnpackRequest:
+      type: object
+      required: [title_id, destination_dir]
+      properties:
+        title_id:
+          $ref: "#/components/schemas/TitleId"
+        destination_dir:
+          type: string
+          pattern: "^(/.+|smb://.+)$"
+          maxLength: 1023
+          description: Existing directory under a configured scan root. A TITLE_ID child directory is created.
+        delete_source:
+          type: boolean
+          default: false
+          description: Delete the backing image only after a complete copy and successful unmount.
+
+    StorageJobStatusRequest:
+      type: object
+      properties:
+        job_id:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Omit to return the current or most recently completed job.
+
+    StorageJobCancelRequest:
+      type: object
+      required: [job_id]
+      properties:
+        job_id:
+          type: integer
+          format: int64
+          minimum: 1
+
+    SettingsUpdateRequest:
+      type: object
+      required: [debug, quiet_mode, update_emulators, allow_lan_access, fan_target_temperature, scan_paths]
+      properties:
+        debug:
+          type: boolean
+        quiet_mode:
+          type: boolean
+        update_emulators:
+          type: boolean
+        fakelib_default_mode:
+          type: string
+          enum: [full, emulators, disabled]
+          description: Mode inherited by games without an individual override. Initial default is full. Omission preserves the current value; changes apply on the next launch.
+        auto_update_ampr:
+          type: boolean
+          description: Download libSceAmpr.sprx updates from the configured GitHub release URL. Omission preserves the current value for compatibility with older web clients.
+        auto_remove_missing_games:
+          type: boolean
+          description: Remove app registrations whose source remains unavailable. Omission preserves the current value for compatibility with older web clients.
+        auto_remove_missing_delay_seconds:
+          type: integer
+          minimum: 1
+          maximum: 86400
+          description: Omission preserves the current value for compatibility with older web clients.
+        allow_lan_access:
+          type: boolean
+          default: true
+          description: Bind to 0.0.0.0 when true or 127.0.0.1 when false.
+        fan_target_temperature:
+          type: integer
+          description: Zero selects system control; otherwise 50 through 91 degrees Celsius.
+          oneOf:
+            - const: 0
+            - minimum: 50
+              maximum: 91
+        scan_paths:
+          type: array
+          description: Explicit custom roots only. An empty array restores compile-time defaults.
+          maxItems: 256
+          items:
+            type: string
+            pattern: "^/.+"
+            maxLength: 1023
+
+    SettingsResponse:
+      allOf:
+        - $ref: "#/components/schemas/SettingsUpdateRequest"
+        - type: object
+          required: [status, api_enabled, scan_path_count, fakelib_default_mode]
+          properties:
+            status:
+              type: integer
+              const: 0
+            api_enabled:
+              type: boolean
+              description: Whether the HTTP API is enabled in config.ini.
+            scan_path_count:
+              type: integer
+              minimum: 0
+
+    DebugLogResponse:
+      type: object
+      additionalProperties: false
+      required: [status, file_size, returned_bytes, truncated, content]
+      properties:
+        status:
+          type: integer
+          const: 0
+        file_size:
+          type: integer
+          format: int64
+          minimum: 0
+        returned_bytes:
+          type: integer
+          minimum: 0
+          maximum: 262144
+        truncated:
+          type: boolean
+        content:
+          type: string
+
+    KernelLogResponse:
+      type: object
+      additionalProperties: false
+      required: [status, total_bytes, returned_bytes, truncated, content]
+      properties:
+        status:
+          type: integer
+          const: 0
+        total_bytes:
+          type: integer
+          minimum: 0
+        returned_bytes:
+          type: integer
+          minimum: 0
+          maximum: 262144
+        truncated:
+          type: boolean
+        content:
+          type: string
+
+    VersionResponse:
+      type: object
+      additionalProperties: false
+      required: [status, api_version, shadowmount_version, capabilities]
+      properties:
+        status:
+          type: integer
+          const: 0
+        api_version:
+          type: integer
+          const: 1
+        shadowmount_version:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+            enum: [web_ui, storage_space, storage_eject, list_images, list_games, game_info, game_data_sizes, pkg_install, pkg_browser_stream, smb2_smb3, game_icon, mount_game, unmount_game, uninstall_game, uninstall_game_content, install_game_source, move_game_source, copy_game_source, delete_game_source, unpack_game_image, storage_job_status, storage_job_cancel, list_manual_sources, add_manual_source, remove_manual_source, manage_settings, read_debug_log, read_kernel_log, rescan]
+          example: [web_ui, storage_space, storage_eject, list_images, list_games, game_info, game_data_sizes, pkg_install, pkg_browser_stream, smb2_smb3, game_icon, mount_game, unmount_game, uninstall_game, uninstall_game_content, install_game_source, move_game_source, copy_game_source, delete_game_source, unpack_game_image, storage_job_status, storage_job_cancel, list_manual_sources, add_manual_source, remove_manual_source, manage_settings, read_debug_log, read_kernel_log, rescan]
+
+    StorageMount:
+      type: object
+      additionalProperties: false
+      required: [source, mount_point, filesystem, total_bytes, free_bytes, available_bytes, used_bytes, read_only]
+      properties:
+        source:
+          type: string
+        mount_point:
+          type: string
+          pattern: "^/"
+        filesystem:
+          type: string
+        total_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        free_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        available_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        used_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        read_only:
+          type: boolean
+        mount_id:
+          type: string
+          pattern: '^[0-9a-f]{16}$'
+          description: Present for ejectable mounts; echo unchanged in the eject request.
+        ejectable:
+          type: boolean
+          description: External USB mount accepted by the safe-unmount endpoint.
+
+    StorageSpaceResponse:
+      type: object
+      additionalProperties: false
+      required: [status, count, destination_count, mounts, destinations]
+      properties:
+        status:
+          type: integer
+          const: 0
+        count:
+          type: integer
+          minimum: 0
+        destination_count:
+          type: integer
+          minimum: 0
+        mounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/StorageMount"
+        destinations:
+          type: array
+          items:
+            $ref: "#/components/schemas/StorageDestination"
+
+    SmbStorageSpaceResponse:
+      type: object
+      additionalProperties: false
+      required: [status, path, filesystem, remote, total_bytes, free_bytes, available_bytes, used_bytes, read_only]
+      properties:
+        status: {type: integer, const: 0}
+        path: {type: string, pattern: "^smb://"}
+        filesystem: {type: string, const: smb}
+        remote: {type: boolean, const: true}
+        total_bytes: {$ref: "#/components/schemas/StorageMount/properties/total_bytes"}
+        free_bytes: {$ref: "#/components/schemas/StorageMount/properties/free_bytes"}
+        available_bytes: {$ref: "#/components/schemas/StorageMount/properties/available_bytes"}
+        used_bytes: {$ref: "#/components/schemas/StorageMount/properties/used_bytes"}
+        read_only: {type: boolean}
+
+    StorageDestination:
+      type: object
+      additionalProperties: false
+      required: [path, filesystem]
+      properties:
+        path:
+          type: string
+          pattern: "^(/|smb://)"
+        name:
+          type: string
+          description: Saved SMB connection name
+        remote:
+          type: boolean
+          description: True for SMB destinations; capacity fields are omitted
+        source:
+          type: string
+        mount_point:
+          type: string
+          pattern: "^/"
+        filesystem:
+          type: string
+        total_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        free_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        available_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        used_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        read_only:
+          type: boolean
+        ejectable:
+          $ref: "#/components/schemas/StorageMount/properties/ejectable"
+        mount_id:
+          $ref: "#/components/schemas/StorageMount/properties/mount_id"
+
+    Image:
+      type: object
+      additionalProperties: false
+      required:
+        - path
+        - mount_point
+        - size
+        - mtime_sec
+        - mtime_nsec
+        - unit_id
+        - backend
+        - complete
+        - source_available
+        - mapped
+        - mounted
+      properties:
+        path:
+          type: string
+        mount_point:
+          type: string
+        size:
+          type: integer
+          format: int64
+          minimum: 0
+        mtime_sec:
+          type: integer
+          format: int64
+        mtime_nsec:
+          type: integer
+          minimum: 0
+          maximum: 999999999
+        unit_id:
+          type: integer
+          minimum: -1
+        backend:
+          type: string
+          enum: [LVD, MD, UNKNOWN]
+        complete:
+          type: boolean
+        source_available:
+          type: boolean
+        mapped:
+          type: boolean
+        mounted:
+          type: boolean
+
+    ImagesResponse:
+      type: object
+      additionalProperties: false
+      required: [status, count, images]
+      properties:
+        status:
+          type: integer
+          const: 0
+        count:
+          type: integer
+          minimum: 0
+        images:
+          type: array
+          items:
+            $ref: "#/components/schemas/Image"
+
+    Game:
+      type: object
+      additionalProperties: false
+      required:
+        - path
+        - runtime_path
+        - backport_path
+        - source_type
+        - image_type
+        - platform
+        - title_id
+        - content_id
+        - title_name
+        - version
+        - last_access_time
+        - install_time
+        - icon_url
+        - app_db_size_bytes
+        - installed
+        - managed
+        - mounted
+        - image_backed
+        - source_available
+        - installed_pkg
+        - can_uninstall
+        - can_manage_source
+        - can_toggle_fakelib
+        - ignore_global_fakelib
+        - fakelib_mode
+        - fakelib_mode_override
+        - fakelib_default_mode
+        - fakelib_enabled
+        - fakelib_effective_enabled
+      properties:
+        path:
+          type: string
+          description: Physical game folder, outer backing-image path or installed app.pkg.
+        runtime_path:
+          type: string
+          description: Runtime game directory used by ShadowMount; empty for installed PKGs.
+        backport_path:
+          type: string
+          description: Backport directory found using the shared title backport resolver; empty when absent. Presence does not imply that fakelib is enabled or the overlay is mounted.
+        source_type:
+          type: string
+          enum: [folder, image, pkg]
+        image_type:
+          type: string
+          enum: ["", ufs, exfatfs, pfs, pfsc, fpkg, unknown]
+        platform:
+          type: string
+          enum: [ps4, ps5, unknown]
+        title_id:
+          $ref: "#/components/schemas/TitleId"
+        content_id:
+          type: string
+        title_name:
+          type: string
+        version:
+          type: string
+          description: AppInfoJson CONTENT_VERSION (PS5) or APP_VER (PS4), or an empty string when unavailable.
+        last_access_time:
+          type: string
+          description: AppInfoJson #_last_access_time value, falling back to app.db lastAccessTime, or an empty string.
+        install_time:
+          type: string
+          description: AppInfoJson #_install_time value, falling back to app.db installTime, or an empty string.
+        icon_url:
+          type: string
+          description: Relative URL of the icon endpoint, or an empty string.
+        app_db_size_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        installed:
+          type: boolean
+        managed:
+          type: boolean
+        mounted:
+          type: boolean
+        image_backed:
+          type: boolean
+        can_unpack:
+          type: boolean
+          description: False for direct FPKGs; their launch cache is not a full extracted game. Existing image unpack operations are unchanged.
+        source_available:
+          type: boolean
+        installed_pkg:
+          type: boolean
+        can_uninstall:
+          type: boolean
+        can_manage_source:
+          type: boolean
+          description: False for installed PKGs; source mutations are forbidden.
+        can_toggle_fakelib:
+          type: boolean
+          description: True for ordinary PS5 packages, images and folders. Direct FPKGs use a mandatory embedded AMPR runtime and do not expose this toggle.
+        ignore_global_fakelib:
+          type: boolean
+          description: Whether this title excludes the global fakelib overlay; independent of its fakelib mode.
+        fakelib_mode:
+          type: string
+          enum: [full, emulators, disabled]
+          description: Resolved title mode after inheritance.
+        fakelib_mode_override:
+          type: string
+          enum: [default, full, emulators, disabled]
+          description: Explicit title mode or default to inherit fakelib_default_mode.
+        fakelib_default_mode:
+          type: string
+          enum: [full, emulators, disabled]
+          description: Current mode inherited by titles without an override.
+        fakelib_enabled:
+          type: boolean
+          description: Whether the resolved title mode enables fakelib; changes apply on the next launch.
+        fakelib_effective_enabled:
+          type: boolean
+          description: Per-title policy combined with the global backport_fakelib switch.
+        size_status:
+          type: integer
+          minimum: 0
+          description: errno-style result of optional physical size calculation.
+        size_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Physical image, folder or base app.pkg size in games/info. Library listings may use the recorded app.db installed total for PKGs, falling back to package file size.
+        save_data_size_status:
+          type: integer
+          minimum: 0
+          description: games/info only. Errno-style result of counting this title's save files across local profiles. Missing directories succeed with zero bytes.
+        save_data_size_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Present when save_data_size_status is zero. Includes backups within each title's save directory; excludes cloud and metadata folders.
+        download_size_status:
+          type: integer
+          minimum: 0
+          description: games/info only. Errno-style result of counting /user/download/title_id. Missing directories succeed with zero bytes.
+        download_size_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Present when download_size_status is zero. Sum of regular-file sizes for the title's download directory.
+        patch_size_status:
+          type: integer
+          minimum: 0
+          description: games/info only. Errno-style result for separate patch files on internal and connected extended storage; missing directories succeed with zero bytes.
+        patch_size_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Present when patch_size_status is zero. Sum of regular-file lengths; aliased title directories are counted once.
+        dlc_size_status:
+          type: integer
+          minimum: 0
+          description: games/info only. Errno-style result for installed add-on files on internal and connected extended storage; missing directories succeed with zero bytes.
+        dlc_size_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Present when dlc_size_status is zero. Sum of regular-file lengths below the title's addcont directories; aliases are counted once.
+        system_content_size_status:
+          type: integer
+          description: games/info only. AppGetSize result, zero on success; native error codes are preserved.
+        system_content_size_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+          description: System-accounted installed total from AppGetSize. Does not replace physical source sizes, particularly for folders and images.
+        patch_info_status:
+          type: integer
+          description: Patch information result, zero on success. Native download status falls back to installed patch.pkg presence when task history is absent. Available in library listings and game details.
+        has_patch:
+          type: boolean
+          description: Library only; present when patch_info_status is zero. True for a playable/completed native patch or a regular nonempty patch.pkg in the supported internal/ext0/ext1 roots.
+        base_version:
+          type: string
+          description: Game details only. Original version read from the base PKG for a patched PKG game. Empty if absent or unreadable; never assumed from the current patched version.
+        dlc_count:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Library only; installed DLC count from AppGetAddcontNum, present when dlc_info_status is zero. Does not enumerate content or measure files.
+        patch:
+          $ref: "#/components/schemas/InstalledPatchInfo"
+        dlc_info_status:
+          type: integer
+          description: Native DLC count result in library listings, enumeration result in game details. Zero on success; independent of filesystem measurement errors.
+        dlc_info_truncated:
+          type: boolean
+          description: More than 256 matching records exist. Partial arrays can also accompany a nonzero dlc_info_status.
+        dlc:
+          type: array
+          maxItems: 256
+          items:
+            $ref: "#/components/schemas/InstalledDlcInfo"
+        status:
+          type: integer
+          const: 0
+
+    InstalledPatchInfo:
+      type: object
+      additionalProperties: false
+      required: [installed, version, size_bytes]
+      properties:
+        installed:
+          type: boolean
+          description: Native patch status is playable/completed or a regular nonempty patch.pkg exists in a supported internal/ext0/ext1 root. Consult patch_info_status before treating false as absence.
+        version:
+          type: string
+        size_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Patch byte count from native install status, or the filesystem measurement when installed-file fallback is used. Native counts may exclude metadata.
+
+    InstalledDlcInfo:
+      type: object
+      additionalProperties: false
+      required: [content_id, title_name, version, size_status]
+      properties:
+        content_id:
+          type: string
+        title_name:
+          type: string
+        version:
+          type: string
+        size_status:
+          type: integer
+          minimum: 0
+        size_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Size recorded by the system for this DLC. Present when size_status is zero.
+
+    GamesResponse:
+      type: object
+      additionalProperties: false
+      required: [status, count, size_included, games]
+      properties:
+        status:
+          type: integer
+          const: 0
+        count:
+          type: integer
+          minimum: 0
+        size_included:
+          type: boolean
+        games:
+          type: array
+          items:
+            $ref: "#/components/schemas/Game"
+
+    GameInfoResponse:
+      allOf:
+        - $ref: "#/components/schemas/Game"
+        - type: object
+          required: [status, size_status, patch_info_status, patch, dlc_info_status, dlc_info_truncated, dlc, system_content_size_status]
+
+    StorageJobResponse:
+      type: object
+      additionalProperties: false
+      required: [status, job_id, operation, state, active, cancellable, cancel_requested, title_id, source_type, source, runtime_source, destination, delete_source, total_bytes, processed_bytes, total_files, processed_files, progress_percent, speed_bytes_per_second, elapsed_ms, affected_titles, result_status, result_error, result_error_reason, scan_queued]
+      properties:
+        status:
+          type: integer
+          const: 0
+        job_id:
+          type: integer
+          format: int64
+          minimum: 0
+        operation:
+          type: string
+          enum: ["", move, copy, delete, unpack, install, eject]
+        state:
+          type: string
+          enum: [idle, preparing, measuring, transferring, deleting, finalizing, installing, completed, failed, cancelled]
+        active:
+          type: boolean
+        cancellable:
+          type: boolean
+        cancel_requested:
+          type: boolean
+        title_id:
+          type: string
+        title_name:
+          type: string
+        native_status:
+          type: integer
+          description: Raw AppInstUtil result; format as unsigned eight-digit hexadecimal for display.
+        queue_count: {type: integer, minimum: 0, maximum: 32, description: Remaining entries including the active PKG until successful completion.}
+        queue_completed: {type: integer, minimum: 0}
+        queue_total: {type: integer, minimum: 0}
+        queue_running: {type: boolean}
+        package_kind: {type: string, enum: [unknown, base, patch, dlc]}
+        source_type:
+          type: string
+          enum: ["", folder, image, pkg, stream, backport, usb]
+        source:
+          type: string
+        runtime_source:
+          type: string
+        destination:
+          type: string
+          description: Empty for delete and eject jobs.
+        delete_source:
+          type: boolean
+          description: True only for unpack jobs that will remove the image after successful extraction.
+        total_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        processed_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        total_files:
+          type: integer
+          format: int64
+          minimum: 0
+        processed_files:
+          type: integer
+          format: int64
+          minimum: 0
+        progress_percent:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+        speed_bytes_per_second:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Average processed-byte rate since transfer or deletion began. PKG installation uses recent system byte deltas (browser streams can use HTTP coverage until system counters are available), sampled about once per second; stalled or inactive installs report zero.
+        elapsed_ms:
+          type: integer
+          format: int64
+          minimum: 0
+        affected_titles:
+          type: integer
+          minimum: 0
+        result_status:
+          type: integer
+          minimum: 0
+        result_error:
+          type: string
+          description: English error text; localized clients should use result_error_reason when available.
+        result_error_reason:
+          $ref: "#/components/schemas/OperationErrorReason"
+        blocking_source:
+          type: string
+          description: One blocking USB dependency's image path or mount source; empty when unavailable.
+        blocking_target:
+          type: string
+          description: Blocking mount target; empty for an attached image or when unavailable.
+        scan_queued:
+          type: boolean
+
+    ScanResponse:
+      type: object
+      additionalProperties: false
+      required: [status, queued, reset_attempts, scan_queued, scan_deferred, scan_deferred_reason]
+      properties:
+        status:
+          type: integer
+          const: 0
+        queued:
+          type: boolean
+          const: true
+        reset_attempts:
+          type: boolean
+        scan_queued:
+          type: boolean
+          const: true
+        scan_deferred:
+          type: boolean
+          description: Whether game runtime or rest mode prevents scanning at response time; queue acceptance does not mean scan completion.
+        scan_deferred_reason:
+          type: string
+          enum: ["", game_active, runtime_prepared, rest_mode]
+
+    ManualUpdateResponse:
+      type: object
+      additionalProperties: false
+      required: [status, path, present, changed]
+      properties:
+        status:
+          type: integer
+          const: 0
+        path:
+          type: string
+        present:
+          type: boolean
+        changed:
+          type: boolean
+
+    ManualListResponse:
+      type: object
+      additionalProperties: false
+      required: [status, count, paths]
+      properties:
+        status:
+          type: integer
+          const: 0
+        count:
+          type: integer
+          minimum: 0
+        paths:
+          type: array
+          items:
+            type: string
+            pattern: "^/.+"
+
+    MountResponse:
+      type: object
+      additionalProperties: false
+      required: [status, title_id, mounted, mode]
+      properties:
+        status:
+          type: integer
+          const: 0
+        title_id:
+          $ref: "#/components/schemas/TitleId"
+        mounted:
+          type: boolean
+          const: true
+        mode:
+          type: string
+          enum: [default, ro, rw]
+
+    UnmountResponse:
+      type: object
+      additionalProperties: false
+      required: [status, title_id, mounted]
+      properties:
+        status:
+          type: integer
+          const: 0
+        title_id:
+          $ref: "#/components/schemas/TitleId"
+        mounted:
+          type: boolean
+          const: false
+
+    UninstallResponse:
+      type: object
+      additionalProperties: false
+      required: [status, title_id, uninstall_requested, scan_queued, scan_deferred, scan_deferred_reason]
+      properties:
+        status:
+          type: integer
+          const: 0
+        title_id:
+          $ref: "#/components/schemas/TitleId"
+        uninstall_requested:
+          type: boolean
+          const: true
+        scan_queued:
+          type: boolean
+          description: Full synchronization was queued because the known source was absent before uninstall; retained sources are not immediately rediscovered.
+        scan_deferred:
+          type: boolean
+        scan_deferred_reason:
+          type: string
+          enum: ["", game_active, runtime_prepared, rest_mode]
+
+    MissingSourceResponse:
+      type: object
+      additionalProperties: false
+      required: [status, title_id, source_missing, scan_queued, scan_deferred, scan_deferred_reason]
+      properties:
+        status:
+          type: integer
+          const: 0
+        title_id:
+          $ref: "#/components/schemas/TitleId"
+        source_missing:
+          type: boolean
+          const: true
+        scan_queued:
+          type: boolean
+          const: true
+        scan_deferred:
+          type: boolean
+        scan_deferred_reason:
+          type: string
+          enum: ["", game_active, runtime_prepared, rest_mode]
+
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [status, error]
+      properties:
+        status:
+          type: integer
+          minimum: 1
+          description: Positive errno value
+        error:
+          type: string
+        error_reason:
+          $ref: "#/components/schemas/OperationErrorReason"
+
+    OperationErrorReason:
+      type: string
+      description: Stable reason code for localized operation errors; empty for generic errno failures.
+      enum: ["", rest_mode, game_active, install_pending, runtime_prepared, scanner_busy, runtime_busy, title_unmount_busy, image_unmount_busy, unpack_mounted, storage_busy, storage_unavailable, usb_disk_busy, usb_mount_busy, usb_partition_busy, usb_image_busy, usb_mount_changed, usb_eject_unconfirmed, usb_eject_failed, pkg_invalid, pkg_base_missing, pkg_stream_lost, pkg_source_changed, pkg_already_installed, pkg_queued, pkg_queue_full]
+
+    PackageListing:
+      type: object
+      required: [status, path, parent, roots, root_storage, entries, offset, truncated, limit, can_create_directory]
+      properties:
+        status: {type: integer, enum: [0]}
+        path: {type: string}
+        parent: {type: string}
+        roots: {type: array, items: {type: string}}
+        root_storage:
+          type: array
+          description: Filesystem capacity for local roots in package listings, including read-only and nullfs roots. Empty for directory-picker listings; unavailable root capacities are omitted. SMB capacity comes from the per-path storage request.
+          items:
+            $ref: "#/components/schemas/StorageDestination"
+        offset: {type: integer, minimum: 0}
+        limit: {type: integer, enum: [32, 256]}
+        can_create_directory: {type: boolean, description: True for a writable non-system parent in a directory-picker listing; false at the drive selector and for package-only listings}
+        truncated: {type: boolean}
+        entries:
+          type: array
+          maxItems: 256
+          items:
+            type: object
+            required: [name, path, directory, installable, can_delete, size_bytes]
+            properties:
+              name: {type: string}
+              path: {type: string}
+              directory: {type: boolean}
+              installable: {type: boolean}
+              can_delete: {type: boolean, description: Path policy and write/delete access permit browser deletion. False for protected roots, system/read-only paths and local scanned folders/images; queued or active jobs can still block mutation.}
+              source_type: {type: string, enum: [folder, image], description: Non-PKG source installed by copying without queue support.}
+              backport: {type: boolean}
+              backport_installed: {type: boolean}
+              size_bytes: {type: integer, format: int64}
+              title_id: {type: string}
+              title_name: {type: string}
+              icon_url: {type: string, description: Versioned installed-game cover URL for backports; empty when unavailable.}
+              content_id: {type: string}
+              version: {type: string}
+              sdk_version: {type: integer, minimum: 0, maximum: 4294967295, description: Packed SDK from param.json/param.sfo for PKGs and game directories or the backport eboot.bin process parameter; zero when unavailable.}
+              kind: {type: string, enum: [base, patch, dlc, unknown]}
+              installed: {type: boolean, description: The base game is already installed as a native PKG.}
+              replaceable: {type: boolean, description: Full media application remaster that can replace an existing native app.}
+              base_installed: {type: boolean, description: A base game is registered from a PKG or a folder/image source.}
+              base_queued: {type: boolean}
+              has_icon: {type: boolean}
+              icon_revision: {type: string}
+    PackageQueue:
+      type: object
+      required: [status, queue_running, queue_completed, queue_total, entries]
+      properties:
+        status: {type: integer, enum: [0]}
+        queue_running: {type: boolean}
+        queue_completed: {type: integer, minimum: 0}
+        queue_total: {type: integer, minimum: 0}
+        entries:
+          type: array
+          maxItems: 32
+          items:
+            type: object
+            required: [path, title_id, title_name, content_id, version, kind, size_bytes, has_icon, icon_revision]
+            properties:
+              path: {type: string}
+              title_id: {type: string}
+              title_name: {type: string}
+              content_id: {type: string}
+              version: {type: string}
+              sdk_version: {type: integer, minimum: 0, maximum: 4294967295, description: Packed param.json/param.sfo SDK version; zero when unavailable.}
+              kind: {type: string, enum: [base, patch, dlc, unknown]}
+              size_bytes: {type: integer, format: int64, minimum: 0}
+              replaceable: {type: boolean, description: Full media application remaster that can replace an existing native app.}
+              has_icon: {type: boolean}
+              icon_revision: {type: string, description: Source revision for the package icon endpoint.}
+    PackageStreamResponse:
+      type: object
+      description: StorageJobResponse fields plus the private browser source token and on-demand WebSocket port.
+      required: [status, job_id, token, stream_port, chunk_bytes]
+      properties:
+        status: {type: integer, enum: [0]}
+        job_id: {type: integer, minimum: 1}
+        token: {type: string, minLength: 32, maxLength: 32}
+        stream_port: {type: integer, minimum: 1, maximum: 65535}
+        chunk_bytes: {type: integer, const: 524288}
+    PackageRange:
+      type: object
+      required: [status, id, offset, size]
+      properties:
+        status: {type: integer, enum: [0]}
+        id: {type: integer, minimum: 0}
+        offset: {type: integer, format: int64, minimum: 0}
+        size: {type: integer, minimum: 0, maximum: 524288}

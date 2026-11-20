@@ -1,0 +1,16 @@
+*.o
+*.elf
+*.so
+*.log
+*.pyc
+__pycache__/
+/.build/
+/.deps/
+/fpkg-bridge/target/
+/release/
+daemon.lock
+notify.txt
+src/notify_icon_asset.c
+src/config_ini_example_asset.c
+src/web_index_asset.c
+src/shell_icon_param_asset.c
